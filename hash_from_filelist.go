@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+	"strings"
 )
 
 const maxGoroutines = 10
@@ -47,6 +48,7 @@ func computeHashes(output chan HashInfo, filename string) {
 	for {
 		line, err := reader.ReadString('\n')
 		if line != "" {
+			line = strings.Trim(line, "\n\r\t ")
 			if runtime.NumGoroutine() > maxGoroutines {
 				processFile(line, output, nil)
 			} else {
@@ -71,18 +73,18 @@ func processFile(filename string, output chan HashInfo, done func()) {
 		defer done()
 	}
 
-	fi, err := os.Stat(filename)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
 	file, err := os.Open(filename)
 	if err != nil {
-		log.Println(err)
+		log.Println("could not open file: ", err)
 		return
 	}
 	defer file.Close()
+
+	fi, err := file.Stat()
+	if err != nil {
+		log.Println("could not stat file: ", err)
+		return
+	}
 
 	hash := md5.New()
 	if size, err := io.Copy(hash, file); size != fi.Size() || err != nil {
