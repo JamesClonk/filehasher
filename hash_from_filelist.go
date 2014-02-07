@@ -1,3 +1,5 @@
+#!/usr/bin/env goplay
+
 package main
 
 import (
@@ -12,7 +14,7 @@ import (
 	"sync"
 )
 
-const maxGoroutines = 7
+const maxGoroutines = 10
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
